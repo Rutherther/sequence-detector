@@ -1,7 +1,7 @@
 { lib
-, naersk
 , stdenv
 , clangStdenv
+, rustPlatform
 , hostPlatform
 , targetPlatform
 , pkg-config
@@ -13,9 +13,14 @@
 let
   cargoToml = (builtins.fromTOML (builtins.readFile ./Cargo.toml));
 in
-naersk.lib."${targetPlatform.system}".buildPackage rec {
+rustPlatform.buildRustPackage rec {
   src = ./.;
-  buildInputs = [
+  cargoHash = "sha256-mXkNN5FJphPW/5cn3Fv/Nsfjkc3tssgcZZmHWCfEeYE=";
+
+  name = "${cargoToml.package.name}";
+  version = "${cargoToml.package.version}";
+
+  nativeBuildInputs = [
     rustfmt
     pkg-config
     cargo
@@ -23,9 +28,7 @@ naersk.lib."${targetPlatform.system}".buildPackage rec {
   ];
 
   checkInputs = [ cargo rustc ];
-
   doCheck = true;
-  copyLibs = true;
 
   meta = {
     description = cargoToml.package.description;
